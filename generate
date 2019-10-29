@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 require() {
-  if [[ -z `command -v $1` ]]; then 
+  if [[ -z `command -v $1` ]]; then
     echo "Please install $1"
     exit 1
   fi
