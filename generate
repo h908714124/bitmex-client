@@ -1,0 +1,29 @@
+#!/usr/bin/env bash
+
+require() {
+  if [[ -z `command -v $1` ]]; then 
+    echo "Please install $1"
+    exit 1
+  fi
+}
+
+gen() {
+  curl -XPOST "https://generator.swagger.io/api/gen/clients/java"\
+       -H "accept: application/json"\
+       -H "Content-Type: application/json"\
+       -d '{"spec": {},  "options": {}, "swaggerUrl": "https://www.bitmex.com/api/explorer/swagger.json"}'
+}
+
+# check
+require curl
+require jq
+
+# cleanup
+rm -rf java-client output.zip
+
+# download
+curl -o output.zip `gen | jq .link | tr -d '"'`
+
+# extract
+unzip output.zip
+
