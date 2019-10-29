@@ -31,7 +31,7 @@ unzip output.zip
 
 # create target folder
 mkdir target
-cp -r java-client/src target
+mv java-client/src target
 cp build.gradle target
 cp release target
 
