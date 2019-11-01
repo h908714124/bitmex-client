@@ -6,3 +6,6 @@ Generate Java sources:
 ./generate
 ````
 
+Sample project:
+
+[bitmex-tools-java](https://github.com/h908714124/bitmex-tools-java)
