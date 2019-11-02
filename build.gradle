@@ -93,7 +93,7 @@ signing {
     def signingKey = findProperty("signingKey")
     def signingPassword = findProperty("signingPassword")
     useInMemoryPgpKeys(signingKey, signingPassword)
-    sign configurations.archives
+    sign publishing.publications.mavenJava
 }
 
 // https://docs.gradle.org/current/userguide/signing_plugin.html
@@ -157,50 +157,13 @@ publishing {
     }
 }
 
-/*
+
 uploadArchives {
     repositories {
         mavenDeployer {
-            beforeDeployment { deployment -> signing.signPom(deployment) }
-
-            repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
-                authentication(userName: System.getenv('OSS_USER'), password: System.getenv('OSS_PASS'))
-            }
-
-            snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots/") {
-                authentication(userName: System.getenv('OSS_USER'), password: System.getenv('OSS_PASS'))
-            }
-
-            pom.project {
-                name 'bitmex-client'
-                packaging 'jar'
-                artifactId 'bitmex-client'
-                description 'Generated bitmex client'
-                url 'https://github.com/h908714124/bitmex-client'
-
-                scm {
-                    connection 'scm:svn:https://github.com/h908714124/bitmex-client.git'
-                    developerConnection 'scm:svn:https://github.com/h908714124/bitmex-client.git'
-                    url 'https://github.com/h908714124/bitmex-client'
-                }
-
-                licenses {
-                    license {
-                        name 'MIT License'
-                        url 'https://opensource.org/licenses/MIT'
-                    }
-                }
-
-                developers {
-                    developer {
-                        id 'h908714124'
-                        name 'h908714124'
-                        email 'kraftdurchblumen@gmx.de'
-                    }
-                }
-            }
+            beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
         }
     }
 }
-*/
+
 
