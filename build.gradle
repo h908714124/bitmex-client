@@ -1,17 +1,21 @@
 plugins {
-    id 'java'
-    id 'maven'
+    id 'java-library'
+    id 'maven-publish'
     id 'signing'
 }
 
-sourceCompatibility = '1.8'
-
-compileJava { 
-  options.encoding = "UTF-8" 
-}
-
 group = "com.github.h908714124"
-archivesBaseName = "bitmex-client"
+
+compileJava {
+    options.encoding = "UTF-8"
+    sourceCompatibility = '13'
+    targetCompatibility = '13'
+    doFirst {
+        options.compilerArgs = [
+                '--module-path', classpath.asPath
+        ]
+    }
+}
 
 repositories {
     mavenCentral()
@@ -21,9 +25,9 @@ dependencies {
     implementation 'io.swagger:swagger-annotations:1.5.17'
     implementation 'com.squareup.okhttp:okhttp:2.7.5'
     implementation 'com.squareup.okhttp:logging-interceptor:2.7.5'
-    implementation 'com.google.code.gson:gson:2.8.1'
-    implementation 'io.gsonfire:gson-fire:1.8.0'
-    implementation 'org.threeten:threetenbp:1.3.5'
+    implementation 'com.google.code.gson:gson:2.8.6'
+    implementation 'io.gsonfire:gson-fire:1.8.3'
+    implementation 'org.threeten:threetenbp:1.4.0'
     implementation 'javax.annotation:javax.annotation-api:1.3.2'
     testImplementation 'org.junit.jupiter:junit-jupiter:5.6.0-M1'
     testImplementation 'org.junit.vintage:junit-vintage-engine:5.6.0-M1'
@@ -32,7 +36,6 @@ dependencies {
 jar {
     manifest {
         attributes(
-                'Automatic-Module-Name': 'com.github.h908714124.bitmex-client',
                 'Implementation-Version': project.properties['version']
         )
     }
@@ -46,13 +49,13 @@ test {
 }
 
 task javadocJar(type: Jar) {
-    classifier = 'javadoc'
     from javadoc
+    archiveClassifier = 'javadoc'
 }
 
 task sourcesJar(type: Jar) {
-    classifier = 'sources'
-    from sourceSets.main.allSource
+    from sourceSets.main.allJava
+    archiveClassifier = 'sources'
 }
 
 artifacts {
@@ -60,8 +63,31 @@ artifacts {
 }
 
 signing {
+    useGpgCmd()
     sign configurations.archives
 }
+
+gradle.taskGraph.whenReady { taskGraph ->
+    if (taskGraph.allTasks.any { it instanceof Sign }) {
+        // Use Java's console to read from the console (no good for
+        // a CI environment)
+        def console = System.console()
+        console.printf "\n\nWe have to sign some things in this build." +
+                "\n\nPlease enter your signing details.\n\n"
+
+        def file = console.readLine("PGP Secret Key Ring File (absolute path): ")
+
+        allprojects {
+            ext."signing.keyId" = System.getenv('SIGNING_KEY_ID')
+            ext."signing.password" = System.getenv('SIGNING_PASSWORD')
+            ext."signing.secretKeyRingFile" = file
+        }
+
+        console.printf "\nThanks.\n\n"
+    }
+}
+
+
 
 // https://docs.gradle.org/current/userguide/signing_plugin.html
 gradle.taskGraph.whenReady { taskGraph ->
@@ -74,6 +100,53 @@ gradle.taskGraph.whenReady { taskGraph ->
 }
 
 // https://central.sonatype.org/pages/gradle.html
+publishing {
+    publications {
+        maven(MavenPublication) {
+            artifactId = "bitmex-client"
+            from components.java
+
+            artifact sourcesJar
+            artifact javadocJar
+
+            pom {
+                name = 'bitmex-client'
+                packaging = 'jar'
+                description = 'Generated bitmex client'
+                url = 'https://github.com/h908714124/bitmex-client'
+
+                licenses {
+                    license {
+                        name = 'The Apache License, Version 2.0'
+                        url = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                    }
+                }
+                developers {
+                    developer {
+                        id = 'h908714124'
+                        name = 'h908714124'
+                        email = 'kraftdurchblumen@gmx.de'
+                    }
+                }
+                scm {
+                    connection = 'scm:svn:https://github.com/h908714124/bitmex-client.git'
+                    developerConnection = 'scm:svn:https://github.com/h908714124/bitmex-client.git'
+                    url = 'https://github.com/h908714124/bitmex-client'
+                }
+            }
+        }
+    }
+    repositories {
+        maven {
+            // change URLs to point to your repos, e.g. http://my.org/repo
+            def releasesRepoUrl = "https://oss.sonatype.org/service/local/staging/deploy/maven2/"
+            def snapshotsRepoUrl = "https://oss.sonatype.org/content/repositories/snapshots/"
+            url = version.endsWith('SNAPSHOT') ? snapshotsRepoUrl : releasesRepoUrl
+        }
+    }
+}
+
+/*
 uploadArchives {
     repositories {
         mavenDeployer {
@@ -118,3 +191,5 @@ uploadArchives {
         }
     }
 }
+*/
+

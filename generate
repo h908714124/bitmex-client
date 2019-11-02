@@ -9,11 +9,15 @@ require() {
   fi
 }
 
+URL=https://www.bitmex.com/api/explorer/swagger.json
+MODEL=net.ninety.bitmex.model
+API=net.ninety.bitmex.api
+
 gen() {
   curl -XPOST "https://generator.swagger.io/api/gen/clients/java"\
        -H "accept: application/json"\
        -H "Content-Type: application/json"\
-       -d '{"spec": {},  "options": {}, "swaggerUrl": "https://www.bitmex.com/api/explorer/swagger.json"}'
+       -d "{\"spec\":{},\"options\":{\"modelPackage\":\"$MODEL\",\"apiPackage\":\"$API\"},\"swaggerUrl\":\"$URL\"}"
 }
 
 # check
@@ -32,6 +36,11 @@ unzip output.zip
 # create target folder
 mkdir target
 mv java-client/src target
+rm -rf target/src/main/java/net/ninety/bitmex/auth
+rm -rf target/src/main/java/net/ninety/bitmex/api
+rm -rf target/src/test/java/net/ninety/bitmex/api
+rm target/src/main/java/net/ninety/bitmex/*.java
 cp build.gradle target
 cp release target
+cp module-info.java target/src/main/java
 
