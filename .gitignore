@@ -1,4 +1,10 @@
 /output.zip
 /java-client
 /target
-
+*~
+*.swp
+/gradle
+/gradlew
+/gradlew.bat
+/.gradle
+/.idea
