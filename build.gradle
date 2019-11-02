@@ -93,7 +93,7 @@ signing {
     def signingKey = findProperty("signingKey")
     def signingPassword = findProperty("signingPassword")
     useInMemoryPgpKeys(signingKey, signingPassword)
-    sign publishing.publications.maven
+    sign publishing.publications.mavenJava
 }
 
 // https://docs.gradle.org/current/userguide/signing_plugin.html
@@ -109,7 +109,7 @@ gradle.taskGraph.whenReady { taskGraph ->
 // https://central.sonatype.org/pages/gradle.html
 publishing {
     publications {
-        maven(MavenPublication) {
+        mavenJava(MavenPublication) {
             artifactId = "bitmex-client"
             from components.java
 
