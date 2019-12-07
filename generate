@@ -42,5 +42,4 @@ rm -rf target/src/test/java/net/ninety/bitmex/api
 rm target/src/main/java/net/ninety/bitmex/*.java
 cp build.gradle target
 cp release target
-cp module-info.java target/src/main/java
 

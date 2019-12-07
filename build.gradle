@@ -9,35 +9,15 @@ group = "com.github.h908714124"
 ext.moduleName = 'net.ninety.bitmex'
 
 compileJava {
-    options.encoding = "UTF-8"
-    sourceCompatibility = '13'
-    targetCompatibility = '13'
-    doFirst {
-        options.compilerArgs = [
-                '--module-path', classpath.asPath
-        ]
-    }
+    options.encoding = 'UTF-8'
+    sourceCompatibility = '8'
+    targetCompatibility = '8'
 }
 
-compileTestJava {
-    inputs.property("moduleName", moduleName)
-    doFirst {
-        options.compilerArgs = [
-                '--module-path', classpath.asPath,
-        ]
-        classpath = files()
-    }
-}
-
-test {
-    inputs.property("moduleName", moduleName)
-    doFirst {
-        jvmArgs = [
-                '--module-path', classpath.asPath,
-                '--module-path', classpath.asPath,
-        ]
-        classpath = files()
-    }
+// Prevent a problem with org.gradle.jvm.version
+// https://docs.gradle.org/current/userguide/publishing_gradle_module_metadata.html
+tasks.withType(GenerateModuleMetadata) {
+    enabled = false
 }
 
 repositories {
@@ -59,6 +39,7 @@ dependencies {
 jar {
     manifest {
         attributes(
+                'Automatic-Module-Name': 'net.ninety.bitmex',
                 'Implementation-Version': project.properties['version']
         )
     }
@@ -69,10 +50,6 @@ test {
     testLogging {
         events "passed", "skipped", "failed"
     }
-}
-
-javadoc {
-    exclude("module-info.java")
 }
 
 task javadocJar(type: Jar) {
@@ -87,6 +64,10 @@ task sourcesJar(type: Jar) {
 
 artifacts {
     archives javadocJar, sourcesJar
+}
+
+signing {
+    sign configurations.archives
 }
 
 // https://docs.gradle.org/current/userguide/signing_plugin.html
@@ -138,10 +119,7 @@ publishing {
     }
     repositories {
         maven {
-            // change URLs to point to your repos, e.g. http://my.org/repo
-            def releasesRepoUrl = "https://oss.sonatype.org/service/local/staging/deploy/maven2/"
-            def snapshotsRepoUrl = "https://oss.sonatype.org/content/repositories/snapshots/"
-            url = version.endsWith('SNAPSHOT') ? snapshotsRepoUrl : releasesRepoUrl
+            url = 'https://oss.sonatype.org/service/local/staging/deploy/maven2/'
             credentials {
                 username = System.getenv('OSS_USER')
                 password = System.getenv('OSS_PASS')
